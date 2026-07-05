@@ -7,7 +7,7 @@ under existing law but are lost in a system where prison and court data are neve
 The Liberty Model does not predict who deserves liberty. It checks, deterministically, who the
 law has already granted it to — and cites exactly where.
 
-🔗 **Live demo:(https://poonam160498.github.io/Liberty-Model-Algorithmic-Triage-for-Bail-Applications/)
+🔗 **Live demo:https://poonam160498.github.io/Liberty-Model-Algorithmic-Triage-for-Bail-Applications/
 
 ## Why rules, not machine learning
 
