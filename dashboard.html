@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Triage Dashboard — The Liberty Model</title>
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .filters { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:28px; font-family:-apple-system,sans-serif; }
+  .filters select { padding:10px 14px; border:1px solid var(--border); border-radius:6px; font-size:0.9rem; background:#fff; }
+  .flag-list { list-style:none; font-size:0.82rem; }
+  .flag-list li { margin-bottom:6px; padding-left:14px; border-left:2px solid var(--gold); }
+  .expand-row { display:none; background:#fbfaf7; }
+  .expand-row.open { display:table-row; }
+  .case-row { cursor:pointer; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">The Liberty <span class="scale">Model</span></a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="methodology.html">Methodology</a>
+      <a href="dashboard.html" style="color:var(--gold);">Triage Dashboard</a>
+      <a href="about.html">About &amp; Caveats</a>
+    </nav>
+  </div>
+</header>
+
+<section class="tight" style="padding-top:150px;">
+  <div class="container">
+    <p class="kicker">Synthetic Demonstration Data</p>
+    <h1 style="margin:14px 0 16px; font-size:2.2rem;">Undertrial Triage Dashboard</h1>
+    <p class="lead" style="margin-bottom:8px;">120 synthetic cases, checked against every entitlement rule.
+      Every flag below cites the exact legal ground — click a row to see the full reasoning.</p>
+    <p class="sans" style="font-size:0.82rem; color:#a13030; font-weight:600;">⚠ All names and case IDs are
+      synthetically generated. No real individual's data appears on this page. See About &amp; Caveats.</p>
+  </div>
+</section>
+
+<section class="alt tight">
+  <div class="container" style="display:flex; gap:28px; flex-wrap:wrap; justify-content:center;">
+    <div class="stat" style="min-width:160px;"><div class="num" id="stat-flagged">–</div><div class="lbl">Flagged — priority review</div></div>
+    <div class="stat" style="min-width:160px;"><div class="num" id="stat-review">–</div><div class="lbl">Review recommended</div></div>
+    <div class="stat" style="min-width:160px;"><div class="num" id="stat-clear">–</div><div class="lbl">No entitlement detected</div></div>
+    <div class="stat" style="min-width:160px;"><div class="num" id="stat-total">–</div><div class="lbl">Total cases screened</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+
+    <div class="filters">
+      <select id="f-tier">
+        <option value="">All tiers</option>
+        <option value="flagged">Flagged — Priority Review</option>
+        <option value="review">Review Recommended</option>
+        <option value="clear">No Current Entitlement</option>
+      </select>
+      <select id="f-offence">
+        <option value="">All offence categories</option>
+        <option value="Minor (Theft, Fraud)">Minor (Theft, Fraud)</option>
+        <option value="Moderate (Assault, Extortion)">Moderate (Assault, Extortion)</option>
+        <option value="Severe (Murder, NDPS)">Severe (Murder, NDPS)</option>
+      </select>
+      <span class="sans" id="result-count" style="align-self:center; color:#888; font-size:0.88rem;"></span>
+    </div>
+
+    <table id="case-table">
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Offence</th>
+          <th>Custody (days)</th>
+          <th>Age</th>
+          <th>Grounds triggered</th>
+          <th>Tier</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+
+  </div>
+</section>
+
+<section class="alt tight">
+  <div class="container" style="max-width:760px; margin:0 auto; text-align:center;">
+    <h3 style="margin-bottom:12px;">This dashboard demonstrates the engine — it is not a live case management system.</h3>
+    <p class="sans" style="font-size:0.92rem;">A production version would connect to NJDG and prison-record data
+      under appropriate legal and data-protection safeguards, and would be validated with legal aid practitioners
+      before any real deployment. Read the full limitations on the <a href="about.html" style="color:var(--gold); font-weight:700;">About &amp; Caveats</a> page.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p><strong>The Liberty Model</strong> — an independent research project by Poonam Nauroji.</p>
+    <p class="disclaimer">This is a research and portfolio project, not a legal service. All case data shown is
+      synthetic. Nothing here constitutes legal advice or an automated legal decision.</p>
+  </div>
+</footer>
+
+<script src="js/engine.js"></script>
+<script>
+let ALL_CASES = [];
+
+fetch("cases.json")
+  .then(r => r.json())
+  .then(raw => {
+    ALL_CASES = processCases(raw);
+    updateStats(ALL_CASES);
+    render(ALL_CASES);
+  })
+  .catch(() => {
+    document.getElementById("table-body").innerHTML =
+      `<tr><td colspan="6" style="text-align:center; padding:40px; color:#a13030;">Could not load cases.json — make sure you're running this via Live Server, not opening the file directly.</td></tr>`;
+  });
+
+function updateStats(cases) {
+  document.getElementById("stat-flagged").textContent = cases.filter(c => c.tier === "flagged").length;
+  document.getElementById("stat-review").textContent = cases.filter(c => c.tier === "review").length;
+  document.getElementById("stat-clear").textContent = cases.filter(c => c.tier === "clear").length;
+  document.getElementById("stat-total").textContent = cases.length;
+}
+
+function tierBadge(tier, label) {
+  return `<span class="tier tier-${tier}">${label}</span>`;
+}
+
+function render(cases) {
+  const body = document.getElementById("table-body");
+  document.getElementById("result-count").textContent = cases.length + " cases shown";
+
+  if (cases.length === 0) {
+    body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#888;">No cases match these filters.</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = cases.map((c, i) => `
+    <tr class="case-row" onclick="toggleRow(${i})">
+      <td class="sans" style="font-weight:600;">${c.id}</td>
+      <td>${c.offence}</td>
+      <td class="sans">${c.custodyDays}</td>
+      <td class="sans">${c.age}</td>
+      <td class="sans">${c.flags.length}</td>
+      <td>${tierBadge(c.tier, c.tierLabel)}</td>
+    </tr>
+    <tr class="expand-row" id="expand-${i}">
+      <td colspan="6">
+        ${c.flags.length === 0
+          ? `<p class="sans" style="color:#888;">No entitlement rules currently triggered for this case.</p>`
+          : `<ul class="flag-list">${c.flags.map(f => `
+              <li><span class="citation">${f.citation}</span> — <strong>${f.label}</strong><br>
+                  <span class="sans" style="color:#666;">${f.detail}</span></li>
+            `).join("")}</ul>`}
+      </td>
+    </tr>
+  `).join("");
+}
+
+function toggleRow(i) {
+  document.getElementById(`expand-${i}`).classList.toggle("open");
+}
+
+function applyFilters() {
+  const tier = document.getElementById("f-tier").value;
+  const offence = document.getElementById("f-offence").value;
+  let filtered = ALL_CASES;
+  if (tier) filtered = filtered.filter(c => c.tier === tier);
+  if (offence) filtered = filtered.filter(c => c.offence === offence);
+  render(filtered);
+}
+
+document.getElementById("f-tier").addEventListener("change", applyFilters);
+document.getElementById("f-offence").addEventListener("change", applyFilters);
+</script>
+
+</body>
+</html>

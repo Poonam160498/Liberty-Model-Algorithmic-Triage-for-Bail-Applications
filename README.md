@@ -1,32 +1,47 @@
-# Liberty Model: Algorithmic Triage for Bail Applications ⚖️📊
+# The Liberty Model
 
-## Overview
-This repository contains the source code and methodology for the "Liberty Model," a data-driven framework designed to evaluate the judicial efficiency of bail applications. The project applies advanced text analytics to public legal datasets from the Indore Bench of the Madhya Pradesh High Court.
+**Rules-as-code triage for undertrial entitlement — not a risk predictor.**
 
-## Project Objectives
-* **Algorithmic Triage:** To develop a framework that categorizes and analyzes bail applications based on extracted legal entities.
-* **Efficiency Metrics:** To measure and visualize judicial processing timelines and case outcome trends.
-* **Custom Logic:** Implements specialized boolean filtering tailored to specific legal parameters, moving beyond generic frequency sorting.
+Roughly three in four prisoners in India are undertrials. Many already qualify for release
+under existing law but are lost in a system where prison and court data are never joined up.
+The Liberty Model does not predict who deserves liberty. It checks, deterministically, who the
+law has already granted it to — and cites exactly where.
 
-## Tech Stack & Tools
-* **Language:** Python
-* **Data Manipulation:** `pandas`, `numpy`
-* **Text Analytics:** NLP techniques, Named Entity Recognition (NER)
-* **Environment:** Anaconda, VS Code
-* **Version Control:** Git & GitHub
+🔗 **Live demo:** *(add your deployed link here)*
 
-## Methodology
-1. **Data Extraction:** Ingesting unstructured public legal datasets.
-2. **Preprocessing:** Cleaning legal jargon and standardizing text formats.
-3. **Entity Recognition:** Utilizing NER to identify key legal entities (e.g., charge types, dates, case statuses).
-4. **Custom Filtering:** Applying specific boolean logic to filter data relevant to operational efficiency.
-5. **Analysis:** Generating actionable insights regarding judicial bottlenecks.
+## Why rules, not machine learning
 
-## How to Run
-1. Clone the repository: `git clone [Your Repository URL]`
-2. Navigate to the directory: `cd liberty-model`
-3. Install required dependencies: `pip install -r requirements.txt`
-4. Run the main analysis script: `python main_analysis.py`
+Predictive bail models estimate reoffending or flight risk from historical data — bias in, bias
+out, and opaque at the point where it matters most. This project takes a different, narrower
+approach: every check answers a factual, verifiable question ("has this person served the
+custody threshold the law itself set?"), not a predictive one. See `methodology.html` for the
+full rulebook and citations (BNSS s.479, *Satender Kumar Antil v CBI*, *Hussainara Khatoon v
+State of Bihar*, and others).
 
-## Future Scope
-Expanding the dataset to include broader jurisdictions and integrating interactive dashboards using Plotly Dash for real-time visualization of judicial trends.
+## What's real and what's synthetic (read this first)
+
+- **Dashboard case data**: 120 synthetic cases, generated to resemble realistic patterns. No
+  real individual's data is shown.
+- **Homepage statistics**: real aggregate figures from NCRB Prison Statistics / NJDG, used for
+  context only — not linked to any case in the dashboard.
+- **Data extraction pipeline** (`/pipeline` scripts, not connected to the live site): a proof of
+  concept for pulling anonymised case metadata from public eCourts/NJDG pages, built to test
+  feasibility for a future, properly-reviewed real-data version.
+
+Full caveats and what would need to happen before any real-world use are on `about.html`.
+
+## Tech
+
+Static HTML/CSS/JS. `js/engine.js` is a deterministic rules engine — no ML, no learned weights.
+`cases.json` holds the synthetic case set consumed by the dashboard.
+
+## Author
+
+Poonam Nauroji — LLM (Criminal Law) · MSc Business Analytics, University of Exeter.
+Part of a research thread that also includes an [analysis of UK asylum appeal
+outcomes](#) and an LLM dissertation on unequal application of criminal law in India.
+
+## Disclaimer
+
+This is a research and portfolio project, not a legal service. Nothing here constitutes legal
+advice or an automated legal decision.
